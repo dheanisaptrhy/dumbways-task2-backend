@@ -2,22 +2,25 @@ const { user } = require('../../models')
 
 //import package joi
 const Joi = require('joi')
+// import package bcrypt
+const bcrypt = require('bcrypt')
 
 exports.register = async (req, res) => {
     try {
         const data = req.body
-
+        //bcrypt
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(data.password, salt)
+        // cek data dengan ketentuan
+        
         // blueprint pengecekan ketentuan
         const schema = Joi.object({
             fullname: Joi.string().min(5).required(),
             email: Joi.string().email().min(5).required(),
-            password: Joi.string().min(5).required(),
-            role: Joi.string().required()
+            password: Joi.string().min(5).required()
         })
-
-        // cek data dengan ketentuan
+        
         const { error } = schema.validate(data)
-
         if (error) {
             return res.status(400).send({
                 status: 'Error',
@@ -25,11 +28,28 @@ exports.register = async (req, res) => {
             })
         }
 
+        //cek misal emailnya sudah digunakan
+        const userExist = await user.findOne({
+            where:{
+                email:data.email
+            },
+            attributes:{
+                exclude: ['createdAt', 'updatedAt']
+            }
+        })
+        if(userExist){
+            return res.status(400).send({
+                status:'failed',
+                message:'Email has already taken, just like your crush'
+            })
+        }
+        
+        //masukkan ke database
         const newUser = await user.create({
             fullname: data.fullname,
             email: data.email,
-            password: data.password,
-            role: data.role
+            password: hashedPassword,
+            role: 'user'
         })
 
         res.status(201).send({
