@@ -40,6 +40,8 @@ exports.register = async (req, res) => {
             message: 'Email has already taken'
         })
     }
+
+    //try-catch
     try {
         //bcrypt
         const salt = await bcrypt.genSalt(10)
@@ -52,11 +54,18 @@ exports.register = async (req, res) => {
             role: 'user'
         })
 
+        //generate token
+        const dataToken = {
+            id: user.id
+        }
+        const SECRET_KEY = process.env.TOKEN_KEY
+        const token = jwt.sign(dataToken, SECRET_KEY)
+
         res.status(201).send({
             status: 'success',
             data: {
                 email: newUser.email,
-
+                token
             }
         })
 

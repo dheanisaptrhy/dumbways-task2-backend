@@ -15,8 +15,9 @@ exports.auth = (req, res, next) => {
         const SECRET_KEY = process.env.TOKEN_KEY
         //untuk membandingkan
         const verified = jwt.verify(token, SECRET_KEY)
+        //data ini berisi token
         req.user = verified
-
+        //langsung lanjut ke controller
         next()
 
     } catch (error) {
