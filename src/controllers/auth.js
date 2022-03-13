@@ -4,6 +4,8 @@ const { user } = require('../../models')
 const Joi = require('joi')
 // import package bcrypt
 const bcrypt = require('bcrypt')
+// import jwt
+const jwt = require('jsonwebtoken')
 
 exports.register = async (req, res) => {
     const data = req.body
@@ -93,17 +95,27 @@ exports.login = async (req, res) => {
         })
 
         const passValid = await bcrypt.compare(data.password, userExist.password)
-        if(!passValid){
+        if (!passValid) {
             return res.status(400).send({
-                status:'failed',
-                message:'Email or Password doesn\'t match'
+                status: 'failed',
+                message: 'Email or Password doesn\'t match'
             })
         }
+
+        //token
+        const dataToken = {
+            id: userExist.id
+        }
+        const SECRET_KEY = process.env.TOKEN_KEY
+        const token = jwt.sign(dataToken, SECRET_KEY)
+
+        //status pengiriman
         res.status(200).send({
-            status:'success',
-            data:{
-                fullname:userExist.fullname,
-                email:userExist.email
+            status: 'success',
+            data: {
+                fullname: userExist.fullname,
+                email: userExist.email,
+                token
             }
         })
     } catch (error) {
