@@ -14,10 +14,6 @@ exports.getUsers = async (req, res) => {
             }
         })
 
-        res.send({
-            status: 'success',
-            data: createData
-        })
     } catch (error) {
         console.log(error);
         res.send({

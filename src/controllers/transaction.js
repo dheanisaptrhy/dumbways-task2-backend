@@ -1,34 +1,35 @@
-const { transaction } = require('../../models')
-const { addBook } = require('./book')
+const { transaction, user } = require('../../models')
+// const { addBook } = require('./book')
 
 exports.addTransaction = async (req, res) => {
     try {
         const data = req.body
-        await transaction.create({
-            idUser: data.idUser,
-            transferProof: data.transferProof,
+        const newTrans = await transaction.create({
+            idUser: req.user.id,
+            transferProof: req.file.filename,
             remainingActive: 30,
             userStatus: 'Active',
             paymentStatus: 'Approved',
             accountNumber: data.accountNumber
         })
 
+        //get Data
         const getTrans = await transaction.findOne({
             where: {
-                idUser: data.idUser
+                id:newTrans.id
             },
             include: {
                 model: user,
                 as: 'user',
                 attributes: {
-                    exclude: ['email', 'password', 'role', 'createdAt', 'updatedAt',]
+                    exclude: ['email', 'password', 'role', 'createdAt', 'updatedAt']
                 }
             },
             attributes:{
                 exclude:['idUser', 'idBook', 'accountNumber', 'createdAt', 'updatedAt',]
             }
-
         })
+
 
         res.status(201).send({
             status: 'succes',
@@ -73,7 +74,7 @@ exports.editTransaction = async (req, res) => {
 
         })
 
-        res.status(201).send({
+        res.status(200).send({
             status: 'succes',
             data: {
                 updated
@@ -92,7 +93,7 @@ exports.editTransaction = async (req, res) => {
 exports.getTransaction = async (req, res) => {
     try {
         const { id } = req.params
-        const getOne = await transaction.findOne({
+        const trans = await transaction.findOne({
             where: {
                 id
             },
@@ -111,7 +112,7 @@ exports.getTransaction = async (req, res) => {
         res.send({
             status: 'success',
             data: {
-                getOne
+                trans
             }
         })
     } catch (error) {
@@ -125,7 +126,7 @@ exports.getTransaction = async (req, res) => {
 
 exports.getAllTransaction = async (req, res) => {
     try {
-        const getAll = await transaction.findAll({
+        const transactions = await transaction.findAll({
             include: {
                 model: user,
                 as: 'user',
@@ -141,7 +142,7 @@ exports.getAllTransaction = async (req, res) => {
         res.send({
             status: 'success',
             data: {
-                getAll
+                transactions
             }
         })
     } catch (error) {

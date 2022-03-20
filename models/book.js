@@ -17,13 +17,7 @@ module.exports = (sequelize, DataTypes) => {
           name:'idUser'
         }
       })
-      //buku memiliki banyak transaksi
-      book.hasMany(models.transaction,{
-        as:'transactions',
-        foreignKey:{
-          name:'idBook'
-        }
-      })
+      
     }
   }
   book.init({

@@ -3,15 +3,9 @@ const { book, user } = require('../../models')
 exports.getBook = async (req, res) => {
     try {
         const data = await book.findAll({
-            include: {
-                model: user,
-                as: 'user',
-                attributes: {
-                    exclude: ['password', 'createdAt', 'updatedAt']
-                }
-            },
+            
             attributes: {
-                exclude: ['createdAt', 'updatedAt']
+                exclude: ['idUser','createdAt', 'updatedAt']
             }
         })
 
@@ -22,7 +16,7 @@ exports.getBook = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status().send({
+        res.status(400).send({
             status: 'failed',
             message: 'Server error'
         })
@@ -32,19 +26,12 @@ exports.getBook = async (req, res) => {
 exports.getDetailBook = async (req, res) => {
     try {
         const { id } = req.params
-        const detail = await product.findOne({
+        const detail = await book.findOne({
             where: {
                 id
             },
-            include: {
-                model: user,
-                as: 'user',
-                attributes: {
-                    exclude: ['createdAt', 'updatedAt']
-                }
-            },
             attributes: {
-                exclude: ['createdAt', 'updatedAt']
+                exclude: ['idUser','createdAt', 'updatedAt']
             }
         })
 
@@ -56,7 +43,7 @@ exports.getDetailBook = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        res.status().send({
+        res.status(400).send({
             status: 'failed',
             message: 'Server error'
         })
@@ -65,14 +52,14 @@ exports.getDetailBook = async (req, res) => {
 
 exports.addBook = async (req, res) => {
     try {
-        const data = req.body
+        const {...data} = req.body
         const createBook = await book.create({
             ...data,
-            image: req.file.filename,
+            bookFile: req.file.filename,
             idUser: req.user.id
         })
 
-        res.send({
+        res.status(201).send({
             status: 'success',
             data: {
                 createBook
@@ -81,7 +68,7 @@ exports.addBook = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status().send({
+        res.status(400).send({
             status: 'failed',
             message: 'Server error'
         })
@@ -102,6 +89,9 @@ exports.editBook = async (req, res) => {
         const updated = await book.findOne({
             where:{
                 id
+            }, 
+            attributes: {
+                exclude: ['idUser','createdAt', 'updatedAt']
             }
         })
 
@@ -128,7 +118,7 @@ exports.deleteBook = async (req,res)=>{
                 id
             }
         })
-        res.status().send({
+        res.status(200).send({
             status:'success',
             data:{
                 id
